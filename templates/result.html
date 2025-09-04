@@ -1,0 +1,233 @@
+{% extends "base.html" %}
+
+{% block title %}Results - FertilizerAI{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12">
+            <div class="text-center mb-5">
+                <h1 class="display-5 fw-bold">Prediction Results</h1>
+                <p class="lead text-muted">AI analysis of your plant image</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Image and Main Results -->
+        <div class="col-lg-6">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-image me-2"></i>Your Plant Image
+                    </h5>
+                    <img src="data:image/jpeg;base64,{{ image_data }}" 
+                         class="img-fluid rounded" 
+                         alt="Uploaded plant image">
+                </div>
+            </div>
+            
+            <!-- Prediction Results -->
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-chart-line me-2"></i>AI Prediction
+                    </h5>
+                    
+                    <!-- Fertilizer Type -->
+                    <div class="mb-4">
+                        <h6 class="text-muted mb-2">Recommended Fertilizer Type</h6>
+                        <div class="fertilizer-type">{{ prediction.fertilizer_type }}</div>
+                        <div class="mt-2">
+                            <small class="text-muted">Confidence: {{ "%.1f"|format(prediction.confidence * 100) }}%</small>
+                            <div class="confidence-bar mt-1">
+                                <div class="confidence-fill" style="width: {{ prediction.confidence * 100 }}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Quantity -->
+                    <div class="mb-4">
+                        <h6 class="text-muted mb-2">Recommended Quantity</h6>
+                        <div class="quantity-display">{{ "%.1f"|format(prediction.fertilizer_quantity) }} grams</div>
+                        <small class="text-muted">per kg of soil</small>
+                    </div>
+                    
+                    <!-- All Probabilities -->
+                    <div class="mb-4">
+                        <h6 class="text-muted mb-3">All Fertilizer Type Probabilities</h6>
+                        {% for fertilizer, prob in prediction.all_type_probabilities.items() %}
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="{% if fertilizer == prediction.fertilizer_type %}fw-bold text-primary{% endif %}">
+                                {{ fertilizer }}
+                            </span>
+                            <div class="d-flex align-items-center">
+                                <div class="progress me-2" style="width: 100px; height: 8px;">
+                                    <div class="progress-bar {% if fertilizer == prediction.fertilizer_type %}bg-primary{% else %}bg-secondary{% endif %}" 
+                                         style="width: {{ prob * 100 }}%"></div>
+                                </div>
+                                <small class="text-muted">{{ "%.1f"|format(prob * 100) }}%</small>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Visualization and Recommendations -->
+        <div class="col-lg-6">
+            <!-- Visualization -->
+            {% if visualization %}
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-chart-pie me-2"></i>Analysis Visualization
+                    </h5>
+                    <img src="data:image/png;base64,{{ visualization }}" 
+                         class="img-fluid rounded" 
+                         alt="Analysis visualization">
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Recommendations -->
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-lightbulb me-2"></i>Recommendations
+                    </h5>
+                    {% for recommendation in recommendations %}
+                    <div class="recommendation-item">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        {{ recommendation }}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Action Buttons -->
+    <div class="row mt-5">
+        <div class="col-12 text-center">
+            <div class="d-flex justify-content-center gap-3">
+                <a href="{{ url_for('predict') }}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-camera me-2"></i>Analyze Another Plant
+                </a>
+                <button class="btn btn-outline-primary btn-lg" onclick="shareResults()">
+                    <i class="fas fa-share me-2"></i>Share Results
+                </button>
+                <button class="btn btn-outline-secondary btn-lg" onclick="downloadResults()">
+                    <i class="fas fa-download me-2"></i>Download Report
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Additional Information -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-info-circle me-2"></i>Important Notes
+                    </h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                <li class="mb-2">
+                                    <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                                    These are AI-generated recommendations
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                                    Consult agricultural experts for critical decisions
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                <li class="mb-2">
+                                    <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                                    Consider soil conditions and weather
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                                    Start with smaller quantities and adjust
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function shareResults() {
+        if (navigator.share) {
+            navigator.share({
+                title: 'FertilizerAI Prediction Results',
+                text: `Recommended fertilizer: {{ prediction.fertilizer_type }}, Quantity: {{ "%.1f"|format(prediction.fertilizer_quantity) }} grams`,
+                url: window.location.href
+            });
+        } else {
+            // Fallback: copy to clipboard
+            const text = `FertilizerAI Results:\nRecommended fertilizer: {{ prediction.fertilizer_type }}\nQuantity: {{ "%.1f"|format(prediction.fertilizer_quantity) }} grams\nConfidence: {{ "%.1f"|format(prediction.confidence * 100) }}%`;
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Results copied to clipboard!');
+            });
+        }
+    }
+    
+    function downloadResults() {
+        // Create a simple text report
+        const report = `
+FertilizerAI Prediction Report
+=============================
+
+Plant Analysis Results:
+- Recommended Fertilizer: {{ prediction.fertilizer_type }}
+- Quantity: {{ "%.1f"|format(prediction.fertilizer_quantity) }} grams per kg of soil
+- Confidence: {{ "%.1f"|format(prediction.confidence * 100) }}%
+
+All Fertilizer Type Probabilities:
+{% for fertilizer, prob in prediction.all_type_probabilities.items() %}
+- {{ fertilizer }}: {{ "%.1f"|format(prob * 100) }}%
+{% endfor %}
+
+Recommendations:
+{% for recommendation in recommendations %}
+- {{ recommendation }}
+{% endfor %}
+
+Generated by FertilizerAI
+Date: ${new Date().toLocaleDateString()}
+        `;
+        
+        const blob = new Blob([report], { type: 'text/plain' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'fertilizer_prediction_report.txt';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+    }
+    
+    // Animate confidence bar on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        const confidenceFill = document.querySelector('.confidence-fill');
+        if (confidenceFill) {
+            setTimeout(() => {
+                confidenceFill.style.transition = 'width 1s ease-in-out';
+            }, 500);
+        }
+    });
+</script>
+{% endblock %}

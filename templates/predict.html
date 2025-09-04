@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+
+{% block title %}Predict - FertilizerAI{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="text-center mb-5">
+                <h1 class="display-5 fw-bold">Fertilizer Prediction</h1>
+                <p class="lead text-muted">
+                    Upload a clear image of your plant to get AI-powered fertilizer recommendations
+                </p>
+            </div>
+            
+            <div class="card">
+                <div class="card-body p-5">
+                    <form id="uploadForm" method="POST" action="{{ url_for('predict') }}" enctype="multipart/form-data">
+                        <!-- Upload Area -->
+                        <div class="upload-area mb-4" id="uploadArea">
+                            <i class="fas fa-cloud-upload-alt text-muted mb-3" style="font-size: 3rem;"></i>
+                            <h5 class="mb-3">Drag & Drop or Click to Upload</h5>
+                            <p class="text-muted mb-3">
+                                Supported formats: JPG, PNG, JPEG, GIF, BMP<br>
+                                Maximum file size: 16MB
+                            </p>
+                            <input type="file" id="fileInput" name="file" accept="image/*" class="d-none" required>
+                            <button type="button" class="btn btn-outline-primary">
+                                <i class="fas fa-folder-open me-2"></i>Choose File
+                            </button>
+                        </div>
+                        
+                        <!-- File Info -->
+                        <div id="fileInfo" class="mb-4"></div>
+                        
+                        <!-- Submit Button -->
+                        <div class="text-center">
+                            <button type="submit" id="submitBtn" class="btn btn-primary btn-lg" onclick="submitForm()">
+                                <i class="fas fa-magic me-2"></i>Analyze Plant
+                            </button>
+                            
+                            <!-- Loading Spinner -->
+                            <div id="loading" class="loading">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="mt-3 text-muted">Analyzing your plant image...</p>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Tips Section -->
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-lightbulb text-warning me-2"></i>
+                        Tips for Best Results
+                    </h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Use good lighting
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Capture the entire plant
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Avoid shadows and reflections
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Use high resolution images
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Focus on leaves and stems
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Remove background clutter
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Enhanced file upload handling
+    document.addEventListener('DOMContentLoaded', function() {
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const fileInfo = document.getElementById('fileInfo');
+        const submitBtn = document.getElementById('submitBtn');
+        
+        // Drag and drop functionality
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+        
+        // Click to upload
+        uploadArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+        
+        // File input change
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+        
+        function handleFile(file) {
+            // Validate file type
+            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/bmp'];
+            if (!allowedTypes.includes(file.type)) {
+                alert('Please select a valid image file (JPG, PNG, GIF, BMP)');
+                return;
+            }
+            
+            // Validate file size (16MB)
+            if (file.size > 16 * 1024 * 1024) {
+                alert('File size must be less than 16MB');
+                return;
+            }
+            
+            // Update file info
+            fileInfo.innerHTML = `
+                <div class="alert alert-success">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-file-image text-success me-3" style="font-size: 2rem;"></i>
+                        <div>
+                            <h6 class="mb-1">${file.name}</h6>
+                            <small class="text-muted">
+                                ${(file.size / 1024 / 1024).toFixed(2)} MB • 
+                                ${file.type.split('/')[1].toUpperCase()}
+                            </small>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-outline-danger ms-auto" onclick="clearFile()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            // Enable submit button
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('btn-secondary');
+            submitBtn.classList.add('btn-primary');
+        }
+        
+        // Clear file function
+        window.clearFile = function() {
+            fileInput.value = '';
+            fileInfo.innerHTML = '';
+            submitBtn.disabled = true;
+            submitBtn.classList.remove('btn-primary');
+            submitBtn.classList.add('btn-secondary');
+        };
+        
+        // Form submission
+        document.getElementById('uploadForm').addEventListener('submit', function(e) {
+            if (!fileInput.files.length) {
+                e.preventDefault();
+                alert('Please select an image file first');
+                return;
+            }
+            
+            // Show loading state
+            submitBtn.style.display = 'none';
+            document.getElementById('loading').style.display = 'block';
+        });
+    });
+</script>
+{% endblock %}

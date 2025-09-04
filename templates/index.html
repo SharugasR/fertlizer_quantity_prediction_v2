@@ -1,0 +1,200 @@
+{% extends "base.html" %}
+
+{% block title %}Home - FertilizerAI{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-4">
+                    AI-Powered Fertilizer Recommendations
+                </h1>
+                <p class="lead mb-4">
+                    Upload a plant image and get instant, accurate fertilizer type and quantity recommendations. 
+                    Perfect for farmers, gardeners, and agricultural enthusiasts.
+                </p>
+                <div class="d-flex gap-3">
+                    <a href="{{ url_for('predict') }}" class="btn btn-light btn-lg">
+                        <i class="fas fa-camera me-2"></i>Start Predicting
+                    </a>
+                    <a href="{{ url_for('about') }}" class="btn btn-outline-light btn-lg">
+                        <i class="fas fa-info-circle me-2"></i>Learn More
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center">
+                <i class="fas fa-seedling" style="font-size: 15rem; opacity: 0.3;"></i>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-12">
+                <h2 class="display-5 fw-bold">Why Choose FertilizerAI?</h2>
+                <p class="lead text-muted">Advanced AI technology meets practical farming needs</p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 text-center">
+                    <div class="card-body">
+                        <i class="fas fa-brain feature-icon"></i>
+                        <h5 class="card-title">AI-Powered Analysis</h5>
+                        <p class="card-text">
+                            Our advanced CNN model analyzes plant images to provide accurate fertilizer recommendations 
+                            based on visual plant health indicators.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card h-100 text-center">
+                    <div class="card-body">
+                        <i class="fas fa-bolt feature-icon"></i>
+                        <h5 class="card-title">Instant Results</h5>
+                        <p class="card-text">
+                            Get fertilizer type and quantity recommendations in seconds. No need for soil testing 
+                            or complex calculations.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card h-100 text-center">
+                    <div class="card-body">
+                        <i class="fas fa-mobile-alt feature-icon"></i>
+                        <h5 class="card-title">Easy to Use</h5>
+                        <p class="card-text">
+                            Simply upload a plant image and get detailed recommendations. Works on any device 
+                            with a camera and internet connection.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-12">
+                <h2 class="display-5 fw-bold">How It Works</h2>
+                <p class="lead text-muted">Three simple steps to get your fertilizer recommendations</p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-4 text-center">
+                <div class="mb-4">
+                    <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                        <span class="fs-2 fw-bold">1</span>
+                    </div>
+                </div>
+                <h5>Upload Plant Image</h5>
+                <p class="text-muted">
+                    Take a clear photo of your plant or upload an existing image. 
+                    Make sure the plant is well-lit and visible.
+                </p>
+            </div>
+            
+            <div class="col-md-4 text-center">
+                <div class="mb-4">
+                    <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                        <span class="fs-2 fw-bold">2</span>
+                    </div>
+                </div>
+                <h5>AI Analysis</h5>
+                <p class="text-muted">
+                    Our advanced CNN model analyzes the plant image to determine 
+                    health status and nutritional needs.
+                </p>
+            </div>
+            
+            <div class="col-md-4 text-center">
+                <div class="mb-4">
+                    <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                        <span class="fs-2 fw-bold">3</span>
+                    </div>
+                </div>
+                <h5>Get Recommendations</h5>
+                <p class="text-muted">
+                    Receive detailed fertilizer type and quantity recommendations 
+                    with practical application advice.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Statistics Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <div class="stats-number">95%</div>
+                    <p class="text-muted">Accuracy Rate</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <div class="stats-number">8</div>
+                    <p class="text-muted">Fertilizer Types</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <div class="stats-number">1000+</div>
+                    <p class="text-muted">Plants Analyzed</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <div class="stats-number">24/7</div>
+                    <p class="text-muted">Available</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-5 bg-primary text-white">
+    <div class="container text-center">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <h2 class="display-5 fw-bold mb-4">Ready to Get Started?</h2>
+                <p class="lead mb-4">
+                    Join thousands of farmers and gardeners who trust FertilizerAI for their plant nutrition needs.
+                </p>
+                <a href="{{ url_for('predict') }}" class="btn btn-light btn-lg">
+                    <i class="fas fa-camera me-2"></i>Upload Your First Image
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Model Status -->
+{% if not model_loaded %}
+<section class="py-3 bg-warning">
+    <div class="container text-center">
+        <div class="alert alert-warning mb-0" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <strong>Model Loading:</strong> The AI model is currently being loaded. Please wait a moment and refresh the page.
+        </div>
+    </div>
+</section>
+{% endif %}
+{% endblock %}
