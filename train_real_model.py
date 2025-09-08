@@ -35,79 +35,77 @@ def create_realistic_dataset(num_samples=1000, output_dir='realistic_dataset'):
     fertilizer_types = []
     quantities = []
     
-    for i in range(num_samples):
-        # Select plant condition
-        condition = np.random.choice(list(plant_conditions.keys()))
-        condition_info = plant_conditions[condition]
-        
-        # Generate image based on condition
+
+    import os
+    import pandas as pd
+    from fertilizer_prediction_model import FertilizerPredictionModel, prepare_data
+    import matplotlib.pyplot as plt
+    import zipfile
+    import subprocess
         img = generate_plant_image(condition, i)
-        
-        # Save image
-        img_path = f"{output_dir}/images/plant_{i:04d}.jpg"
-        cv2.imwrite(img_path, img)
-        
-        # Set labels based on condition
-        fertilizer_type = condition_info['fertilizer']
-        quantity = np.random.uniform(*condition_info['quantity_range'])
-        
-        image_paths.append(img_path)
-        fertilizer_types.append(fertilizer_type)
-        quantities.append(quantity)
-    
-    # Create DataFrame
+
     df = pd.DataFrame({
         'image_path': image_paths,
+        """
+        Download dataset from Kaggle using Kaggle API
+        """
+        print(f"Downloading Kaggle dataset: {dataset}")
+        os.makedirs(download_path, exist_ok=True)
+        # Download using Kaggle CLI
+        result = subprocess.run([
+            "kaggle", "datasets", "download", "-d", dataset, "-p", download_path, "--unzip"
+        ], capture_output=True, text=True)
+        if result.returncode != 0:
+            print(result.stderr)
+            raise RuntimeError("Kaggle download failed. Make sure Kaggle API is installed and configured.")
+        print("✅ Downloaded and extracted dataset.")
         'fertilizer_type': fertilizer_types,
         'quantity_grams': quantities
     })
     
-    # Save dataset info
+        Train the model with real data from Kaggle
     df.to_csv(f"{output_dir}/dataset.csv", index=False)
-    
-    print(f"✅ Created realistic dataset with {len(df)} samples")
-    print("Fertilizer distribution:")
-    print(df['fertilizer_type'].value_counts())
-    
-    return df
 
-def generate_plant_image(condition, seed):
-    """
-    Generate synthetic plant images based on condition
-    """
-    np.random.seed(seed)
-    
-    # Base image (green plant)
-    img = np.random.randint(100, 200, (224, 224, 3), dtype=np.uint8)
-    
-    # Add plant-like patterns
-    center_x, center_y = 112, 112
-    
-    # Create plant shape
-    for y in range(224):
-        for x in range(224):
-            # Distance from center
-            dist = np.sqrt((x - center_x)**2 + (y - center_y)**2)
-            
-            # Plant stem
-            if 50 < dist < 80 and y > center_y:
-                img[y, x] = [50, 100, 50]  # Dark green stem
-            
-            # Plant leaves
-            elif dist < 60 and y < center_y + 20:
-                if condition == 'healthy_green':
-                    img[y, x] = [50, 150, 50]  # Healthy green
-                elif condition == 'yellowing_leaves':
-                    img[y, x] = [150, 150, 50]  # Yellow-green
-                elif condition == 'purple_leaves':
-                    img[y, x] = [100, 50, 100]  # Purple
-                elif condition == 'brown_edges':
-                    img[y, x] = [100, 80, 50]  # Brownish
-                else:
-                    img[y, x] = [50, 120, 50]  # Default green
-    
-    # Add condition-specific patterns
-    if condition == 'stunted_growth':
+        print("🚀 Training FertilizerAI Model (Kaggle Data)")
+        print("=" * 50)
+
+        # Download dataset from Kaggle (replace with your dataset slug)
+        kaggle_dataset = "your-kaggle-username/your-dataset-name"  # TODO: update this
+        download_kaggle_dataset(kaggle_dataset, download_path="data")
+
+        # Load dataset CSV (update filename as needed)
+        df = pd.read_csv("data/dataset.csv")
+
+        # Prepare data
+        print("\nPreparing data...")
+        train_df, val_df, test_df, label_encoder, quantity_scaler = prepare_data(df)
+
+        # Initialize model
+        print("\nInitializing model...")
+        model = FertilizerPredictionModel(img_size=(224, 224), num_fertilizer_types=8)
+        model.build_model()
+        model.compile_model(learning_rate=0.001)
+
+        # Create data generators
+        print("\nCreating data generators...")
+        train_gen, val_gen = model.create_data_generators(train_df, val_df, batch_size=16)
+
+        # Train model
+        print("\nTraining model...")
+        try:
+            history = model.train(train_gen, val_gen, epochs=20, fine_tune_epochs=10)
+            # Save trained model
+            print("\nSaving trained model...")
+            model.save_model('fertilizer_prediction_model')
+            # Plot training history
+            model.plot_training_history(history)
+            plt.savefig('training_history.png')
+            print("\n✅ Training completed successfully!")
+            print("📊 Training history saved as 'training_history.png'")
+            return True
+        except Exception as e:
+            print(f"❌ Training failed: {str(e)}")
+            return False
         # Make plant smaller
         img = cv2.resize(img, (150, 150))
         img = cv2.resize(img, (224, 224))
